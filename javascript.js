@@ -10,13 +10,13 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-
+var sv = snapshot.val();
 //-----------------------------------------------------------------------------------
 var database = firebase.database();
 var name = "";
 var destination = "";
-var firstTrain = "10:10";
-var frequency = 3;
+var firstTrain = sv.firstTrain;
+var frequency = sv.frequency;
 
 
 $("#add-train").on("click", function (event) {
@@ -28,9 +28,6 @@ $("#add-train").on("click", function (event) {
     destination = $("#destination").val().trim();
     firstTrain = $("#firstTrain").val().trim();
     frequency = $("#frequency").val().trim();
-    console.log(name)
-
-
 
     var time = moment(firstTrain, "HH:mm").subtract(1, "years");
 
@@ -48,21 +45,28 @@ $("#add-train").on("click", function (event) {
     var tRemainder = diffTime % frequency;
     console.log(tRemainder);
 
+    var tMinutesTillTrain = frequency - tRemainder;
+    console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
 
+    var nextTrain = moment().add(tMinutesTillTrain, "minutes").format("hh:mm");
+    console.log("ARRIVAL TIME: " + moment(nextTrain))
+
+    var TextNextTrain = moment(nextTrain).format("hh:mm")
 
 
     database.ref().push({
         name: name,
         destination: destination,
-        firstTimeConverted: firstTimeConverted,
+        TextNextTrain: TextNextTrain,
         frequency: frequency,
+        tMinutesTillTrain: tMinutesTillTrain,
         dateAdded: firebase.database.ServerValue.TIMESTAMP
     });
 });
 
 database.ref().on("child_added", function (snapshot) {
     // storing the snapshot.val() in a variable for convenience
-    var sv = snapshot.val();
+    
     
 
     // Console.loging the last user's data
@@ -73,16 +77,18 @@ database.ref().on("child_added", function (snapshot) {
 
     // Change the HTML to reflect
     var newRow = $("<tr>");
-
     var nameTD = $("<td>").text(sv.name);
     var destTD = $("<td>").text(sv.destination);
     var frqTD = $("<td>").text(sv.frequency);
-    var ftrain = $("<td>").text(sv.firstTimeConverted);
+    var NTrainTD = $("<td>").text(sv.TextNextTrain);
+    var timenextTD = $("<td>").text(sv.tMinutesTillTrain);
+
 
     newRow.append(nameTD);
     newRow.append(destTD);
     newRow.append(frqTD);
-    newRow.append(ftrain);
+    newRow.append(NTrainTD);
+    newRow.append(timenextTD);
     $("#newNew").append(newRow);
 
     // Handle the errors
