@@ -10,13 +10,14 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-var sv = snapshot.val();
+
 //-----------------------------------------------------------------------------------
 var database = firebase.database();
 var name = "";
 var destination = "";
-var firstTrain = sv.firstTrain;
-var frequency = sv.frequency;
+var firstTrain = "";
+var frequency;
+var time;
 
 
 $("#add-train").on("click", function (event) {
@@ -33,41 +34,35 @@ $("#add-train").on("click", function (event) {
 
     console.log(time);
 
-    // Current Time
-    var currentTime = moment();
-    console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
-
-    // Difference between the times
-    var diffTime = moment().diff(moment(time), "minutes");
-    console.log("DIFFERENCE IN TIME: " + diffTime);
-
-    // Time apart (remainder)
-    var tRemainder = diffTime % frequency;
-    console.log(tRemainder);
-
-    var tMinutesTillTrain = frequency - tRemainder;
-    console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
-
-    var nextTrain = moment().add(tMinutesTillTrain, "minutes").format("hh:mm");
-    console.log("ARRIVAL TIME: " + moment(nextTrain))
-
-    var TextNextTrain = moment(nextTrain).format("hh:mm")
-
 
     database.ref().push({
         name: name,
         destination: destination,
-        TextNextTrain: TextNextTrain,
+        firstTrain: firstTrain,
         frequency: frequency,
-        tMinutesTillTrain: tMinutesTillTrain,
-        dateAdded: firebase.database.ServerValue.TIMESTAMP
+        
+      dateAdded: firebase.database.ServerValue.TIMESTAMP
     });
 });
 
 database.ref().on("child_added", function (snapshot) {
     // storing the snapshot.val() in a variable for convenience
-    
-    
+    var sv = snapshot.val();
+    // Current Time
+    var currentTime = moment();
+    console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
+    // Difference between the times
+    var diffTime = moment().diff(moment(time), "minutes");
+    console.log("DIFFERENCE IN TIME: " + diffTime);
+    // Time apart (remainder)
+    var tRemainder = diffTime % frequency;
+    console.log(tRemainder);
+    var tMinutesTillTrain = frequency - tRemainder;
+    console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
+    var nextTrain = moment().add(tMinutesTillTrain, "minutes").format("hh:mm")
+    console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"))
+    console.log(nextTrain)
+
 
     // Console.loging the last user's data
     // console.log(sv.name);
@@ -80,9 +75,11 @@ database.ref().on("child_added", function (snapshot) {
     var nameTD = $("<td>").text(sv.name);
     var destTD = $("<td>").text(sv.destination);
     var frqTD = $("<td>").text(sv.frequency);
-    var NTrainTD = $("<td>").text(sv.TextNextTrain);
+    var NTrainTD = $("<td>").text(sv.nextTrain);
     var timenextTD = $("<td>").text(sv.tMinutesTillTrain);
 
+console.log(timenextTD.val())
+console.log(nameTD.val())
 
     newRow.append(nameTD);
     newRow.append(destTD);
